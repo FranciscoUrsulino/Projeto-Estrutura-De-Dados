@@ -15,7 +15,7 @@ class Alunologin: #tela de quando é efetuado o loguin do Aluno
         self.clear_entries()
         print("Atualizar")
 
-    def search_record(self):
+    def search_record(self): # *Lembrar de adicionar outros dados
         try:
             self.tree.delete(*self.tree.get_children())
             self.theCursor.execute("select * from Books where Titulo like ? or Anol like  ?", ('%'+self.search_value.get()+'%','%'+self.search_value.get()+'%'))
@@ -52,7 +52,7 @@ class Alunologin: #tela de quando é efetuado o loguin do Aluno
         except:
             print("Não foi possível atualizar os dados (1)")
 
-    def setup_db(self):
+    def setup_db(self): #banco de dados
         try:
             self.sqlite_var = sqlite3.connect('Books.db')
             self.theCursor = self.sqlite_var.cursor()
@@ -130,7 +130,7 @@ class adminlogin: #Tela de quando é efetuado o login de alguem da coordenação
         self.clear_entries()
         print("Atualizar dados")
 
-    def search_record(self): # Metodo de fazer a pesquisa de dados.
+    def search_record(self): # Metodo de fazer a pesquisa de dados. Lembrar de adicionar outros dados
         try:
             self.tree.delete(*self.tree.get_children())
             self.theCursor.execute("select * from Books where Titulo like ? or Anol like ?", ('%'+self.search_value.get()+'%','%'+self.search_value.get()+'%'))
@@ -150,7 +150,7 @@ class adminlogin: #Tela de quando é efetuado o login de alguem da coordenação
             raise print("não foi possivel encontrar dados")
 
     def reset_db(self): # metodo para apagar os dados do banco de dados.
-        sn = messagebox.askquestion("Deseja realmente deletar todos os dados  do BD?") #Sim ou não
+        sn = messagebox.askquestion("Erro","Deseja realmente deletar todos os dados  do BD?") #Sim ou não
         if(sn=='yes'):
             self.theCursor.execute("DROP TABLE Books")
             print("DADOS APAGADOS!!!")
@@ -164,7 +164,7 @@ class adminlogin: #Tela de quando é efetuado o login de alguem da coordenação
         self.categoria_entry.delete(0, "end")
         self.tematica_entry.delete(0, "end")
 
-    def delete_record(self): # Metodo para teletar um livro específico
+    def delete_record(self): # Metodo para deletar um livro específico
         try:
             self.theCursor.execute("delete FROM Books WHERE ID=?",(self.curItem['values'][0],))
             print("DADOS DELETADOS")
@@ -219,7 +219,7 @@ class adminlogin: #Tela de quando é efetuado o login de alguem da coordenação
             raise print("Erro ao atualizar os dados")
 
 
-    def write_record(self):
+    def write_record(self):#Cadastra livro e testa se já existe
         if(self.Name_value.get()!="" and self.ano_no_value.get()!="" and self.autor_value.get()!=""):
             try:
                 self.theCursor.execute("""INSERT INTO Books (Titulo, Anol, NomeA, Categoria, Tematica) VALUES (?,?,?,?,?)""",
@@ -340,11 +340,174 @@ class adminlogin: #Tela de quando é efetuado o login de alguem da coordenação
         self.setup_db()
         self.admin_janela.mainloop()
 
-class entrajanela:
+class entrajanela: #janela para cadastrar novo usuario.
 
     sqlite_var = 0
     theCursor = 0
-    curItem=0
+    curItem = 0
+
+    def refresh(self):
+        self.user_tree_update()
+        self.clear_entries()
+        print("Atualizar dados")
+
+    def search_record(self): # Metodo de fazer a pesquisa de dados de usuario.
+        try:
+            self.tree.delete(*self.tree.get_children())
+            self.theCursor.execute("select * from users where usuario like ? or senha like ?", ('%'+self.search_value.get()+'%','%'+self.search_value.get()+'%'))
+            self.result = self.theCursor.fetchall()
+            length= str(len(self.result))
+            if (length==0):
+                messagebox.showinfo("Não é possivel encontrar resultado")
+            if(length!='0'):
+                i = 0
+                for row in self.result:
+                    if(i%2==0):
+                        self.tree.insert("", END, values=row,tag='1')
+                    else:
+                        self.tree.insert("", END, values=row,tag='2')
+                    i= i+1
+        except:
+            raise print("não foi possivel encontrar dados")
+    
+    
+    def show_users(self):
+        try:
+            self.theCursor.execute("SELECT * from users")
+            res=self.theCursor.fetchall()
+        except:
+            print("Não foi possivel carregar BD")
+
+        self.show_u=Tk()
+        self.show_u.title("Lista de Usuarios")
+        self.show_u.resizable(False,False)
+        self.show_u.iconbitmap("test.ico")
+
+
+
+
+
+        self.username_value = StringVar(self.show_u, value="")#
+        self.username_entry = ttk.Entry(self.show_u,textvariable=self.username_value)#
+
+
+        self.password_value = StringVar(self.show_u, value ="")
+        self.password_entry = ttk.Entry(self.show_u,textvariable=self.password_value)
+
+
+        self.delete_button = ttk.Button(self.show_u,text="Deletar",command=self.delete_record)
+        self.delete_button.grid(row=7, column=3,padx=9, sticky=W+E)
+
+        self.tree= ttk.Treeview(self.show_u, selectmode="browse", column=("column1", "column2", "column3"), show='headings')
+        self.tree.column("column1", width=100,minwidth=100)
+        self.tree.heading("#1", text="ID")
+        self.tree.column("column2", width=100, minwidth=100 )
+        self.tree.heading("#2", text="Usuario")
+        self.tree.column("column3", width=100, minwidth=100)
+        self.tree.heading("#3", text="Senha")
+        self.tree.bind("<ButtonRelease-1>",self.selectItem)
+        self.tree.bind("<space>",self.selectItem)
+        self.tree.tag_configure('1', background='ivory2')
+        self.tree.tag_configure('2', background= 'alice blue')
+        self.tree.grid(row=5,column=0,columnspan=4,sticky=W+E,padx=9,pady=9)
+        Label(self.show_u,text = "Pesquisar por Usuario :").grid(row=6,column=0,columnspan=2,pady=9,padx=9,sticky=E)
+        self.search_value = StringVar(self.show_u, value="")
+        Entry(self.show_u,textvariable=self.search_value).grid(row=6, column=2,pady=9,padx=9,sticky=W+E)
+        self.search_button = ttk.Button(self.show_u,text="Pesquisar",command=self.search_record)
+        self.search_button.grid(row=6,column=3,pady=9,padx=9,sticky=W+E)
+
+        #Label(self.admin_janela,text="Francisco Neto").grid(row=9,column=0,pady=9,padx=9,sticky=W)
+        self.reset_button = ttk.Button(self.show_u,text="Deletar todos os usuarios!!",command=self.reset_db)
+        self.reset_button.grid(row=4, column=3,padx=9,pady=9,sticky=W+E)
+
+        self.user_tree_update()
+        self.show_u.mainloop()
+    
+    
+    def reset_db(self): # metodo para apagar os dados do banco de dados.
+        sn = messagebox.askquestion("o/","Deseja realmente deletar todos os dados de usuarios do BD?") #Sim ou não
+        if(sn=='yes'):
+            self.theCursor.execute("DROP TABLE users")
+            print("DADOS APAGADOS!!!")
+            self.entra_janela.destroy()
+            self.setup_db()
+            self.user_tree_update()
+
+    def clear_entries(self):
+        self.username_entry.delete(0, "end")
+        self.password_entry.delete(0, "end")
+
+
+    def delete_record(self): # Metodo para teletar um livro específico
+        try:
+            self.theCursor.execute("delete FROM users WHERE ID=?",(self.curItem['values'][0],))
+            print("DADOS DELETADOS")
+        except:
+            print("Não é possivel deletar este dado!")
+        finally:
+            self.curItem=0
+            self.clear_entries()
+            self.user_tree_update()
+            self.sqlite_var.commit()
+
+    def update_record(self): # Atualiza dados de livro.
+        if(self.username_value.get() != "" and self.password_value.get() !=""):
+            #print("Entrou")
+            try:
+                self.theCursor.execute("""UPDATE users SET usuario = ? , senha = ? WHERE ID = ?""",
+                (self.username_value.get(), self.password_value.get(), self.curItem['values'][0]))
+                print("ATUALIZADO COM SUCESSO")
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Esse usuario ja se encontra no banco de dados (2)")
+            except:
+                print("Não foi possivel atualizar os dados !")
+            finally:
+                self.user_tree_update()
+                self.sqlite_var.commit()
+        else:
+            messagebox.showwarning("ERROR", "Favor preencher todos os campos")
+
+    def selectItem(self,event): #seleciona os itens de cada tabela.
+        self.curItem = self.tree.item(self.tree.focus())
+        print(self.curItem)
+        self.username_value.set(self.curItem["values"][1])
+        self.password_value.set(self.curItem["values"][2])
+
+
+    def user_tree_update(self):
+        try:
+            self.tree.delete(*self.tree.get_children())
+            self.theCursor.execute("SELECT * FROM users")
+            self.rows = self.theCursor.fetchall()
+            i = 0
+            for row in self.rows:
+                if(i%2==0):
+                    self.tree.insert("", END, values=row,tag='1')
+                else:
+                    self.tree.insert("", END, values=row,tag='2')
+                i = i+1
+        except:
+            raise print("Erro ao atualizar os dados(1)")
+
+
+    def write_record(self):
+        if(self.username_value.get()!="" and self.password_value.get()!=""):
+            try:
+                self.theCursor.execute("""INSERT INTO users (usuario, senha) VALUES (?,?)""",
+                (self.username_value.get(),self.password_value.get()))
+                self.sqlite_var.commit()
+                self.theCursor.execute("SELECT *,max(id) FROM users")
+                self.rows=self.theCursor.fetchall()
+                print(self.rows[0][0],"{usuario : ",self.rows[0][1],"| senha : ",self.rows[0][2],"} FOI CADASTRADO!")
+                self.clear_entries()
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Erro!", "Este usuario ja se encontra no BD(1)")
+            except:
+                print("Error!", "Não FOI POSSIVEL ATUALIZAR OS DADOS!(1)")
+            finally:
+                self.user_tree_update()
+        else:
+            messagebox.showwarning("Error!", "Preencha todos os dados!")
 
     def setup_db(self):
         try:
@@ -354,58 +517,17 @@ class entrajanela:
             print("NÃO FOI POSSIVEL CONECTAR NO BD!")
 
         try:
-            self.theCursor.execute("CREATE TABLE if not exists users(usuario TEXT NOT NULL UNIQUE, senha TEXT NOT NULL);")
+            self.theCursor.execute("CREATE TABLE if not exists users(ID INTEGER PRIMARY KEY AUTOINCREMENT , usuario TEXT UNIQUE NOT NULL , senha TEXT NOT NULL);")
         except:
             print("NAO FOI POSSIVEL CRIAR A TABELA")
         finally:
             self.sqlite_var.commit()
 
-    def user_tree_update(self):
-        self.tree.delete(*self.tree.get_children())
-        self.theCursor.execute("SELECT * FROM users")
-        res = self.theCursor.fetchall()
-        i = 0
-        for row in res:
-            if(i%2==0):
-                self.tree.insert("", END, values=row, tag='1')
-            else:
-                self.tree.insert("", END, values=row,tag='2')
-            i=i+1
-
-    def clear_users(self):
-        self.theCursor.execute("DROP TABLE users")
-        self.setup_db()
-        self.user_tree_update()
-
-
-    def show_users(self):
-        try:
-            self.theCursor.execute("SELECT * from users")
-            res=self.theCursor.fetchall()
-        except:
-            print("Não foi possivel carregar BD")
-
-        self.showu=Tk()
-        self.showu.title("Lista de Usuarios")
-        self.showu.resizable(False,False)
-        self.showu.iconbitmap("test.ico")
-
-        self.tree= ttk.Treeview(self.showu, selectmode="browse", column=("column1", "column2"), show='headings')
-        self.tree.heading("#1", text="usuario")
-        self.tree.heading("#2", text="senha" )
-        self.tree.tag_configure('1', background='ivory2')
-        self.tree.tag_configure('2', background= 'alice blue')
-        self.tree.grid(row=0,column=0,columnspan=4,sticky=W+E,padx=9,pady=9)
-
-        Button(self.showu,text="Deletar usuarios",command=self.clear_users).grid(row=1,column=0,columnspan=4,sticky=W+E,padx=9,pady=9)
-
-        self.user_tree_update()
-        self.showu.mainloop()
 
     def new_user(self):
         try:
-            if(self.username_text.get()!="" and self.password_text.get()!=""):
-                self.theCursor.execute("INSERT INTO users (usuario,senha) VALUES (?,?)",(self.username_text.get(),self.password_text.get()))
+            if(self.username_value.get()!="" and self.password_value.get()!=""):
+                self.theCursor.execute("INSERT INTO users (usuario,senha) VALUES (?,?)",(self.username_value.get(),self.password_value.get()))
                 self.entra_janela.destroy()
                 messagebox.showinfo("Up!!", "Cadastro realizado com sucesso ")
             else:
@@ -418,8 +540,9 @@ class entrajanela:
             self.sqlite_var.commit()
             self.theCursor.execute("SELECT * from users")
             res=self.theCursor.fetchall()
-            self.username_text.set("")
-            self.password_text.set("")
+            self.username_value.set("")
+            self.password_value.set("")
+
 
     def __init__(self):
         self.entra_janela=Toplevel()
@@ -427,15 +550,15 @@ class entrajanela:
         self.entra_janela.resizable(False,False)
         self.entra_janela.iconbitmap("test.ico")
 
-        self.password_text=StringVar()
-        self.username_text=StringVar()
+        self.password_value=StringVar()
+        self.username_value=StringVar()
 
         Label(self.entra_janela,text = "Cadastrar",font="Ariel").grid(row=0,column=0,sticky=W,pady=10)
         Label(self.entra_janela,text = "Usuario : ",font="Ariel, 12").grid(row=1,column=0)
         Label(self.entra_janela,text= "Senha : ",font="Ariel, 12").grid(row=2,column=0,pady=(0,20))
 
-        Entry(self.entra_janela,font="Atiel, 10",textvariable=self.username_text).grid(row=1,column=1)
-        Entry(self.entra_janela, font="Atiel, 10", textvariable=self.password_text).grid(row=2,column=1,pady=(0,20))
+        Entry(self.entra_janela,font="Atiel, 10",textvariable=self.username_value).grid(row=1,column=1)
+        Entry(self.entra_janela, font="Atiel, 10", textvariable=self.password_value).grid(row=2,column=1,pady=(0,20))
 
         user_add=Button(self.entra_janela,font="Ariel, 17", text="Cadastrar",background='white',command=self.new_user)
         user_add.grid(row=1,column=2,rowspan=2,padx=20,pady=(0,20))
@@ -445,7 +568,7 @@ class entrajanela:
         self.setup_db()
         self.entra_janela.mainloop()
 
-class loginprograma:
+class loginprograma: #Tela do login
     sqlite_var = 0
     theCursor = 0
     curItem= 0
@@ -463,7 +586,7 @@ class loginprograma:
         finally:
             self.sqlite_var.commit()
 
-    def logg(self):
+    def logg(self):# ver se é um aluno ou alguem da coordenação.
         try:
             self.theCursor.execute("SELECT * from users")
             res = self.theCursor.fetchall()
@@ -531,13 +654,13 @@ class mainprograma():
         try:
             entrajanela()
         except:
-            raise Exception("Não foi possivel chamar!")
+            raise Exception("Não foi possivel chamar entrajanela!")
 
     def creatlogin(self):
         try:
             loginprograma()
         except:
-            raise Exception("Não foi possivel chamar!")
+            raise Exception("Não foi possivel chamar loginprograma! ")
 
     def sairjanela(self):
         if messagebox.askokcancel("o/", "Deseja realmente sair ?"):
@@ -576,8 +699,6 @@ class mainprograma():
         self.menubar.add_separator()
 
         self.helpmenu=Menu(self.menubar,tearoff=0)
-        #self.helpmenu.add_command(label="Ajuda")
-        #self.helpmenu.add_separator()
         self.helpmenu.add_command(label="Sobre",command=self.upsobre)
         self.menubar.add_cascade(label="Info",menu=self.helpmenu)
 
