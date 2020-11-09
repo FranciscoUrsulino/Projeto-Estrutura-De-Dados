@@ -6,6 +6,8 @@ livros = list()
 
 
 
+
+
 def linha (tam = 42):
     return '-' * tam
 
@@ -30,13 +32,13 @@ def leiaInt(msg): #tratamento de erro
 
 
 def guardalivro(livros):
-    with open('projeto.json', 'w') as file:
+    with open('bdlivros.json', 'w') as file:
         json.dump(livros, file)
 
 def ler_json():
     livros = {}
-    if os.path.exists('projeto.json'):
-        with open('projeto.json', 'r') as file:
+    if os.path.exists('bdlivros.json'):
+        with open('bdlivros.json', 'r') as file:
             livros = json.load(file)
 
 
@@ -78,6 +80,26 @@ def encontrar(elemento): #faz a pequisa
         for d in v.values():
             print(f' | {str(d): <13}', end='')
         print()
+
+def infolivro(elemento): #faz a pequisa
+    print('O livro tem a categoria {}, com a tematica {}, no ano {} pelo autor {} com a quantidade de {} livros no estoque'.format(livros[elemento]["Categoria"],livros[elemento]["Tematica"],livros[elemento]["Ano"],livros[elemento]["Autor"],livros[elemento]["Quantidade"]))
+
+def pegarlivro(elemento): #Pega o livro
+    if livros[elemento]['Quantidade'] > 0:
+        livros[elemento]['Quantidade'] -= 1
+        print('Livro Alugado com sucesso')
+    else:
+        print('Todos os livros desse modelo foram alugados')
+    for i in dadoslivros.keys():
+        print(f'| {i:<14}', end='')
+    print()
+    print('-=' * 58)
+    for k, v in enumerate(livros):
+        print(f'| {k:>3}', end='')
+        for d in v.values():
+            print(f' | {str(d): <13}', end='')
+        print()
+    print('-=' * 58)
 
 def dellivrosanos(elemento): #deleta todos os livros com o mesmo ano informado
     for i in range(len(livros)):
@@ -139,7 +161,7 @@ def cadastrolivro(): #faz o cadastro de livros
 livros = ler_json() # Carregar dados na list livros
 
 while True:
-    resposta = menu(['Cadastrar Livro', 'Mostrar livros', 'Deletar livro', 'Pesquisar livros', 'Pesquisar por ano', 'Deletar todos os livros no Ano', 'Para sair do programa'])
+    resposta = menu(['Cadastrar Livro', 'Mostrar livros', 'Deletar livro', 'Pesquisar livros','Informação sobre Livro', 'Alugar livro', 'Deletar todos os livros no Ano', 'Para sair do programa'])
     if resposta == 1:
         cadastrolivro()
     elif resposta == 2:
@@ -150,12 +172,15 @@ while True:
         opcao= str(input('Informe algo: '))
         print(encontrar(opcao))
     elif resposta == 5:
-        opcao = int(input('Informe o ano para pesquisar: '))
-        encontrar(opcao)
+        opcao = int(input('Informe algo: '))
+        infolivro(opcao)
     elif resposta == 6:
+        opcao = int(input('Informe qual livro deseja alugar: '))
+        pegarlivro(opcao)
+    elif resposta == 7:
         opcao = int(input('Informe o ano para deletar todos os livros do ano informado: '))
         dellivrosanos(opcao)
-    elif resposta == 7:
+    elif resposta == 8:
         guardalivro(livros)
         break
     else:
