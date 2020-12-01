@@ -65,9 +65,7 @@ def deletarlivro(): #deleta o livro que o usuario informar
 def encontrar(elemento): #faz a pequisa
     lista_pos = []  # apenas pra informar os livros da pesquisa.
     for k, v in enumerate(livros):
-        print('toaquui3')
         if elemento in v.values():
-            print("to aqui")
             lista_pos.append(livros[k])
     print('-=' * 58)
     print('| cod ', end='')
@@ -98,9 +96,7 @@ def pegarlivro(elemento): #Pega o livro
 def dellivrosanos(elemento): #deleta todos os livros com o mesmo ano informado
     for i in range(len(livros)):
         for k, v in enumerate(livros):
-            print('toaquui3')
             if elemento in v.values():
-                print("to aqui")
                 del livros[k]
     mostrarlivros()
 
@@ -156,7 +152,7 @@ while True:
         opcao= str(input('Informe algo: '))
         print(encontrar(opcao))
     elif resposta == 5:
-        opcao = int(input('Informe algo: '))
+        opcao = int(input('Informe o COD do livro: '))
         infolivro(opcao)
     elif resposta == 6:
         opcao = int(input('Informe qual livro deseja alugar: '))
