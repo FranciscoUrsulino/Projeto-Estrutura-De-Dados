@@ -32,13 +32,13 @@ def leiaInt(msg): #tratamento de erro
 
 
 def guardalivro(livros):
-    with open('bdlivros.json', 'w') as file:
+    with open('abc.json', 'w') as file:
         json.dump(livros, file)
 
 def ler_json():
     livros = {}
-    if os.path.exists('bdlivros.json'):
-        with open('bdlivros.json', 'r') as file:
+    if os.path.exists('abc.json'):
+        with open('abc.json', 'r') as file:
             livros = json.load(file)
 
 
@@ -93,13 +93,7 @@ def pegarlivro(elemento): #Pega o livro
     for i in dadoslivros.keys():
         print(f'| {i:<14}', end='')
     print()
-    print('-=' * 58)
-    for k, v in enumerate(livros):
-        print(f'| {k:>3}', end='')
-        for d in v.values():
-            print(f' | {str(d): <13}', end='')
-        print()
-    print('-=' * 58)
+    mostrarlivros()
 
 def dellivrosanos(elemento): #deleta todos os livros com o mesmo ano informado
     for i in range(len(livros)):
@@ -108,17 +102,7 @@ def dellivrosanos(elemento): #deleta todos os livros com o mesmo ano informado
             if elemento in v.values():
                 print("to aqui")
                 del livros[k]
-    print('-=' * 58)
-    print('| cod ', end='')
-    for i in dadoslivros.keys():
-        print(f'| {i:<14}', end='')
-    print()
-    print('-=' * 58)
-    for k, v in enumerate(livros):
-        print(f'| {k:>3}', end='')
-        for d in v.values():
-            print(f' | {str(d): <13}', end='')
-        print()
+    mostrarlivros()
 
 
 
